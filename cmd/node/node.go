@@ -9,7 +9,8 @@ import (
 
 func main() {
 	methods := map[string]func(){
-		"Hardcoded endpoints": methods.Hardcoded,
+		"Hardcoded endpoints":     methods.Hardcoded,
+		"Configuration endpoints": methods.Configuration,
 	}
 
 	for n, m := range methods {
