@@ -1,7 +1,10 @@
 package main
 
 import (
+	"log"
+
 	"github.com/pebbe/zmq4"
+	"github.com/zeromq/gyre"
 )
 
 func main() {
@@ -11,6 +14,10 @@ func main() {
 	endpoint := "*:5555"
 	socket.Bind("tcp://" + endpoint)
 
+	go func() {
+		startBeaconServer()
+	}()
+
 	// Wait for messages
 	println("Started server on endpoint: " + endpoint)
 	for {
@@ -19,5 +26,35 @@ func main() {
 
 		// send reply back to client
 		socket.Send("Hi node!!!", 0)
+	}
+}
+
+func startBeaconServer() {
+	b, err := gyre.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer b.Stop()
+
+	err = b.Start()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for {
+		select {
+		case e := <-b.Events():
+			switch e.Type() {
+			case gyre.EventEnter:
+				log.Printf("[%s] peer %q entered\n", b.Name(), e.Name())
+				b.Whisper(e.Sender(), []byte("Hello"))
+			case gyre.EventExit:
+				log.Printf("[%s] peer %q exited\n", b.Name(), e.Name())
+			default:
+				println("exiting")
+				return
+			}
+		}
 	}
 }
