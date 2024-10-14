@@ -1,8 +1,6 @@
 package main
 
 import (
-	"time"
-
 	"github.com/pebbe/zmq4"
 )
 
@@ -18,9 +16,6 @@ func main() {
 	for {
 		msg, _ := socket.Recv(0)
 		println("Received ", string(msg))
-
-		// do some fake "work"
-		time.Sleep(time.Second)
 
 		// send reply back to client
 		socket.Send("Hi node!!!", 0)
